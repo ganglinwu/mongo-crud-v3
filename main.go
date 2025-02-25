@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"github.com/ganglinwu/mongo-crud-v3/config"
+	"github.com/ganglinwu/mongo-crud-v3/routes"
 )
 
 func main() {
@@ -21,10 +22,22 @@ func main() {
 	defer client.Disconnect(context.TODO())
 
 	// initialize router, consider only using "net/http"
-	httpHandler := new(http.Handler)
+	router := http.NewServeMux()
 
 	// add routes
+	router.HandleFunc("GET /employees", routes.GetAllEmployees)
+	router.HandleFunc("POST /employees", routes.InsertEmployee)
+	router.HandleFunc("GET /employees/{id}", routes.GetEmployeeByID)
+	router.HandleFunc("DELETE /employees/{id}", routes.DropEmployeeByID)
+	router.HandleFunc("PATCH /employees/{id}", routes.PatchEmployeeByID)
+
+	// initialize server with opts
+	server := http.Server{
+		Addr:    ":8080",
+		Handler: router,
+	}
 
 	// listen and serve
-	log.Fatal(http.ListenAndServe(":8080", *httpHandler))
+	fmt.Println("Server listening..")
+	log.Fatal(server.ListenAndServe())
 }
